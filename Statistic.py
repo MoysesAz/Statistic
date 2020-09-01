@@ -67,22 +67,22 @@ class Statistic:
         return self.summation["Σ(fixi)"]/self.summation["Σ(fi)"]
 
     def mode(self):
-        print('Mode of King')
         ind_mo = np.argmax(self.table['fi'])
         f_sup = self.table["fi"][ind_mo + 1]
         f_inf = self.table["fi"][ind_mo - 1]
         h = self.value_sup[ind_mo] - self.value_inf[ind_mo]
         return self.value_inf[ind_mo] + (f_sup / (f_sup + f_inf)) * h
 
-    def mediana(self):
-        print('Mode of King')
-        ind_media = N/2
-        fi = self.table['fi'][ind_media]
-        N = self.summation["Σ(fi)"]
-        f_inf = self.table["fi"][ind_media - 1]
-        h = self.value_sup[ind_media] - self.value_inf[ind_media]
-        print(N, f_inf, h)
-        return self.value_inf[ind_media] + ((N/2 + f_inf)/ fi) * h
+    def median(self):
+        N = self.summation["Σ(fi)"]/2
+        for index, value in enumerate(self.table['Fac']):
+            if value >= N:
+                intervalo_mediana = index
+                break
+        limit_inf = self.table['Fac'][intervalo_mediana - 1]
+        fi = self.table['fi'][intervalo_mediana]
+        h = self.value_sup[intervalo_mediana] - self.value_inf[intervalo_mediana]
+        return self.value_inf[intervalo_mediana] + ((N-limit_inf)/fi)*h
 
     def generator_csv(self):
         pass
@@ -95,4 +95,4 @@ if __name__ == '__main__':
     objeto.generator_csv()
     print('Média: ', objeto.data_average())
     print('Moda: ', objeto.mode())
-    print('Moda: ', objeto.mode_02())
+    print('Moda: ', objeto.median())
