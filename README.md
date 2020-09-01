@@ -5,4 +5,4 @@ Statistical library
 The purpose of this library is to help university students in the subject of statistics.
 
 
-<h2>Documentation<2>
+<h2>Documentation</h2>
