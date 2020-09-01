@@ -84,6 +84,25 @@ class Statistic:
         h = self.value_sup[intervalo_mediana] - self.value_inf[intervalo_mediana]
         return self.value_inf[intervalo_mediana] + ((N-limit_inf)/fi)*h
 
+    def quartis(self):
+        vector = [1/4, 2/4, 3/4]
+        quartis = []
+        for i in vector:
+            N = self.summation["Σ(fi)"]*i
+            for index, value in enumerate(self.table['Fac']):
+                if value >= N:
+                    intervalo_mediana = index
+                    break
+            if intervalo_mediana >= 1:
+                limit_inf = self.table['Fac'][intervalo_mediana - 1]
+            else:
+                limit_inf = 0
+            fi = self.table['fi'][intervalo_mediana]
+            h = self.value_sup[intervalo_mediana] - self.value_inf[intervalo_mediana]
+            quartis.append(self.value_inf[intervalo_mediana] + ((N-limit_inf)/fi)*h)
+        return quartis
+
+
     def generator_csv(self):
         pass
 
