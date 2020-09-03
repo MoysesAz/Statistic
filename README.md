@@ -1,4 +1,4 @@
-# Statistic under development
+# Statistic (under development)
 
 Statistical library
 
