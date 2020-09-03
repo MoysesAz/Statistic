@@ -3,30 +3,29 @@ import pandas as pd
 import math
 
 
-
 # gerente - > modulos com partes da estatistica
 class Statistic:
     """
-        0 = variance table
-        1 = cumulative frequency table by class
-        2 = cumulative frequency table by class
+        0 = variance tables(VARTABLE)
+        1 = cumulative frequency table by class(CFRETABLECLASS)
+        2 = cumulative frequency table by class(CFRETABLE)
     """
-    def __init__(self, key):
-        if key == 0:
-            self.xi = [7, 5, 6, 6, 6, 4, 8, 6, 9, 3]
+    def __init__(self, key, vector=0, xi=None, yi=None, value_inf=None, value_sup=None, fi=None):
+        if key == "VARTB":
+            self.xi = self.generator(xi, 'x')
             self.xi_sqrt = [i * i for i in self.xi]
-            self.yi = [20, 14, 18, 18, 17, 11, 25, 19, 26, 10]
+            self.yi = self.generator(yi, 'y')
             self.yi_sqrt = [i * i for i in self.yi]
             self.xiyi = [self.xi[i] * self.yi[i] for i in range(0, len(self.xi))]
             self.tables(key)
 
-        if key == 1:
-            self.value_inf = [12.5, 13.5, 14.5, 15.5, 16.5, 17.5]
-            self.value_sup = [13.5, 14.5, 15.5, 16.5, 17.5, 18.5]
+        if key == "CMLFTBCL":
+            self.value_inf = self.generator(value_inf, 'Lower value')
+            self.value_sup = self.generator(value_sup, 'Higher value')
             self.value_class = [f"{self.value_inf[i]}|--{self.value_sup[i]} " for i in range(0, len(self.value_inf))]
             self.xi = [(self.value_inf[i] + self.value_sup[i]) / 2 for i in range(0, len(self.value_inf))]
             self.xi_sqrt = [i * i for i in self.xi]
-            self.fi = [7, 13, 19, 24, 15, 2]
+            self.fi = self.generator(fi, 'fi')
             self.fixi = [self.xi[i] * self.fi[i] for i in range(0, len(self.xi))]
             self.far = self.weighted_sum(self.fi)[0]
             self.wi = [i - self.xi[0] for i in self.xi]
@@ -37,7 +36,7 @@ class Statistic:
             self.frac = self.weighted_sum(self.fr)[0]
             self.tables(key)
 
-        if key == 2:
+        if key == "CMLFRETB":
             self.xi = [14]
             self.xi_sqrt = [i * i for i in self.xi]
             self.fi = [7, 13, 19, 24, 15, 2]
@@ -52,15 +51,23 @@ class Statistic:
             self.tables(key)
 
 
-
-    def generator(self, chave):
-        for i in range(0, 5):
-            value = float(input(f"Digite o valor do X {str(len(self.xi))}: "))
-            frequency = float(input(f"Digite a frequência de {value}: "))
-            assert isinstance(value, int) or isinstance(value, float)
-            assert isinstance(frequency, int) or isinstance(frequency, float)
-            self.xi.append(value)
-            self.fi.append(frequency)
+    def generator(self, vector=None, name="vetor"):
+        if isinstance(vector, list):
+            return vector
+        elif vector == None:
+            vector = []
+            while True:
+                value = input(f"Enter the value of {name}({str(len(vector)+1)}) or exit(): ")
+                if value.upper() == "EXIT()" and len(vector) != 0:
+                    return vector
+                elif value.upper() == "EXIT()" and len(vector) == 0:
+                    print("Vector cannot be empty")
+                    return self.generator(vector)
+                try:
+                    vector.append(float(value.replace(",",".").replace(" ", "")))
+                except:
+                    print("Invalid Value.")
+            return vector
 
 
     @staticmethod
@@ -138,26 +145,24 @@ class Statistic:
 
 
     def tables(self, key=1):
-        if key == 0:
+        if key == "VARTB":
             self.table = {"xi": self.xi,
                           "yi": self.yi,
                           "xi²": self.xi_sqrt,
                           "yi²": self.yi_sqrt,
                           "xiyi": self.xiyi}
 
-            self.summation = {"Index": "Value",
-                              "Σ(xi)": self.weighted_sum(self.xi)[1],
+            self.summation = {"Σ(xi)": self.weighted_sum(self.xi)[1],
                               "Σ(yi)": self.weighted_sum(self.yi)[1],
                               "Σ(xi²)": self.weighted_sum(self.xi_sqrt)[1],
                               "Σ(yi²)": self.weighted_sum(self.yi_sqrt)[1],
                               "Σ(xiyi)": self.weighted_sum(self.xiyi)[1]}
 
-            self.df = pd.DataFrame(self.table)
-            self.df_00 = pd.DataFrame(self.summation, index=[0])
-            print(self.df)
-            print(self.df_00)
+            self.data = pd.DataFrame(self.table)
+            self.data_sum = pd.DataFrame(self.summation, index=[0])
+            return (self.data, self.data_sum)
 
-        elif key == 1:
+        elif key == "CMLFTBCL":
             self.table = {"Classe": self.value_class,
                           "xi": self.xi,
                           "fi": self.fi,
@@ -182,12 +187,13 @@ class Statistic:
                               "Σ(fr)": self.weighted_sum(self.fr)[1],
                               "frac": None}
 
-            self.df = pd.DataFrame(self.table)
-            self.df_00 = pd.DataFrame(self.summation, index=[0])
-            print(self.df)
-            print(self.df_00)
+            self.data = pd.DataFrame(self.table)
+            self.data_sum = pd.DataFrame(self.summation, index=[0])
+            return (self.data, self.data_sum)
 
-        elif key == 2:
+
+
+        elif key == "CMLFRETB":
             self.table = {"Classe": self.value_class,
                           "xi": self.xi,
                           "fi": self.fi,
@@ -204,10 +210,9 @@ class Statistic:
                               "Σ(fr)": self.weighted_sum(self.fr)[1],
                               "frac": None}
 
-            self.df = pd.DataFrame(self.table)
-            self.df_00 = pd.DataFrame(self.summation, index=[0])
-            print(self.df)
-            print(self.df_00)
+            self.data = pd.DataFrame(self.table)
+            self.data_sum = pd.DataFrame(self.summation, index=[0])
+            return (self.data, self.data_sum)
 
 
     def generator_csv(self):
@@ -258,7 +263,7 @@ class Statistic:
 
 
 if __name__ == '__main__':
-    objeto = Statistic(0)
+    objeto = Statistic('VARTB', xi=[1,2,3,4,5,6,7,8,9,10], yi=[0,1,9,16,25,36,25,16,9,1])
     print(f"variance: {objeto.variance_x()}")
     print(f"covariancia: {objeto.r_pearson()}")
     print(objeto.classification_r_pearson())
